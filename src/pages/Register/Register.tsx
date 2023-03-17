@@ -1,6 +1,6 @@
 import React, { useContext } from 'react'
 import Input from 'src/components/Input'
-import { registerAccout } from 'src/apis/auth.api'
+import authApi from 'src/apis/auth.api'
 
 import { Link, useNavigate } from 'react-router-dom'
 import { schema, Schema } from 'src/utils/rules'
@@ -27,7 +27,7 @@ export default function Register() {
     resolver: yupResolver(schema)
   })
   const registerAccoutMutation = useMutation({
-    mutationFn: (body: Omit<FormData, 'confirm_password'>) => registerAccout(body)
+    mutationFn: (body: Omit<FormData, 'confirm_password'>) => authApi.registerAccout(body)
   })
 
   const onSubmit = handleSubmit((data) => {
