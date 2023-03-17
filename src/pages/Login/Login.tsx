@@ -2,12 +2,14 @@ import { yupResolver } from '@hookform/resolvers/yup'
 import { useMutation } from '@tanstack/react-query'
 import { watch } from 'fs'
 
-import React from 'react'
+import React, { useContext } from 'react'
 import { useForm } from 'react-hook-form'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { login, registerAccout } from 'src/apis/auth.api'
+import Button from 'src/components/Button'
 import Input from 'src/components/Input'
-import { ResponseApi } from 'src/types/utils.type'
+import { AppContext } from 'src/contexts/app.context'
+import { ErrorResponse } from 'src/types/utils.type'
 import { Schema, schema } from 'src/utils/rules'
 import { isAxiosUnprocessableEntityError } from 'src/utils/utils'
 
@@ -16,12 +18,13 @@ type FormData = Omit<Schema, 'confirm_password'>
 const loginSchema = schema.omit(['confirm_password'])
 
 export default function Login() {
+  const { setIsAuthenticated, setProfile } = useContext(AppContext)
+  const navigate = useNavigate()
   const {
     setError,
     register,
     handleSubmit,
-    formState: { errors },
-    watch
+    formState: { errors }
   } = useForm<FormData>({
     resolver: yupResolver(loginSchema)
   })
@@ -30,14 +33,14 @@ export default function Login() {
   })
 
   const onSubmit = handleSubmit((data) => {
-    console.log('data', data)
     loginMutation.mutate(data, {
       onSuccess: (data) => {
-        console.log(data)
+        setIsAuthenticated(true)
+        setProfile(data.data.data.user)
+        navigate('/')
       },
       onError: (error) => {
-        if (isAxiosUnprocessableEntityError<ResponseApi<FormData>>(error)) {
-          console.log(error)
+        if (isAxiosUnprocessableEntityError<ErrorResponse<FormData>>(error)) {
           const formError = error.response?.data.data
 
           if (formError) {
@@ -52,8 +55,7 @@ export default function Login() {
       }
     })
   })
-  const value = watch()
-  console.log(value, errors)
+
   return (
     <div className='bg-orange'>
       <div className='container'>
@@ -80,12 +82,14 @@ export default function Login() {
                 autoComplete='on'
               />
               <div className='mt-3'>
-                <button
+                <Button
+                  isLoading={loginMutation.isLoading}
+                  disabled={loginMutation.isLoading}
                   type='submit'
-                  className='w-full bg-red-400 py-4 px-2 text-center text-sm uppercase text-white hover:bg-red-700'
+                  className='flex w-full items-center justify-center bg-red-400 py-4 px-2 text-center text-sm uppercase text-white hover:bg-red-700'
                 >
                   Login
-                </button>
+                </Button>
               </div>
               <div className=' mt-8 flex items-center justify-center'>
                 <span className='text-gray-400'>Have not account?</span>

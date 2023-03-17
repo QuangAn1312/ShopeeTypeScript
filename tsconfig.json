@@ -17,6 +17,6 @@
     "jsx": "react-jsx",
     "baseUrl": "."
   },
-  "include": ["src"],
+  "include": ["src", "src/useRouteElement.tsx"],
   "references": [{ "path": "./tsconfig.node.json" }]
 }

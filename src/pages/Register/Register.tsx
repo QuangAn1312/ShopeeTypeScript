@@ -1,20 +1,23 @@
-import React from 'react'
+import React, { useContext } from 'react'
 import Input from 'src/components/Input'
-import { type } from 'os'
 import { registerAccout } from 'src/apis/auth.api'
 
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { schema, Schema } from 'src/utils/rules'
 import { yupResolver } from '@hookform/resolvers/yup'
 import { useForm } from 'react-hook-form'
 import { useMutation } from '@tanstack/react-query'
 import { omit } from 'lodash'
 import { isAxiosUnprocessableEntityError } from 'src/utils/utils'
-import { ResponseApi } from 'src/types/utils.type'
+import { ErrorResponse } from 'src/types/utils.type'
+import { AppContext } from 'src/contexts/app.context'
+import Button from 'src/components/Button'
 
 type FormData = Schema
 
 export default function Register() {
+  const { setIsAuthenticated, setProfile } = useContext(AppContext)
+  const navigate = useNavigate()
   const {
     register,
     handleSubmit,
@@ -31,10 +34,13 @@ export default function Register() {
     const body = omit(data, ['confirm_password'])
     registerAccoutMutation.mutate(body, {
       onSuccess: (data) => {
-        console.log(data)
+        setIsAuthenticated(true)
+        setProfile(data.data.data.user)
+
+        navigate('/')
       },
       onError: (error) => {
-        if (isAxiosUnprocessableEntityError<ResponseApi<Omit<FormData, 'confirm_password'>>>(error)) {
+        if (isAxiosUnprocessableEntityError<ErrorResponse<Omit<FormData, 'confirm_password'>>>(error)) {
           console.log(error)
           const formError = error.response?.data.data
 
@@ -61,7 +67,6 @@ export default function Register() {
         }
       }
     })
-    console.log(data)
   })
 
   return (
@@ -99,9 +104,13 @@ export default function Register() {
                 autoComplete='on'
               />
               <div className='mt-2'>
-                <button className=' w-full bg-red-400 py-4 px-2 text-center text-sm uppercase text-white hover:bg-red-700'>
+                <Button
+                  className=' flex w-full items-center justify-center bg-red-400 py-4 px-2 text-sm uppercase text-white hover:bg-red-700'
+                  isLoading={registerAccoutMutation.isLoading}
+                  disabled={registerAccoutMutation.isLoading}
+                >
                   Register
-                </button>
+                </Button>
               </div>
 
               <div className=' mt-8 flex items-center justify-center'>
