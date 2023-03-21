@@ -2,7 +2,7 @@ import { Product, ProductList, ProductListConfig } from 'src/types/product.type'
 import { SuccesResponse } from 'src/types/utils.type'
 import http from 'src/utils/http'
 
-const URL = 'product'
+const URL = 'products'
 
 export const productApi = {
   getProducts(params: ProductListConfig) {
